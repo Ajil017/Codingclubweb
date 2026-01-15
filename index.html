@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Club // Elite Innovation & Leadership Collective</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-primary: #f5f5f4;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6;
+            --accent-dark: #1d4ed8;
+            --surface: #141417;
+            --font-main: 'Inter', sans-serif;
+            --font-heading: 'Playfair Display', serif;
+            --transition-smooth: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* CUSTOM CURSOR */
+        #cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; transition: transform 0.1s; }
+        #cursor-follower { width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+
+        /* NAV & BRANDING */
+        nav {
+            position: fixed;
+            top: 0; width: 100%; padding: 2rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; mix-blend-mode: difference;
+        }
+
+        .logo { 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-heading); 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            filter: brightness(1.1);
+            transition: transform 0.4s ease;
+        }
+        .logo-img {
+        filter: drop-shadow(0 0 6px rgba(59,130,246,0.4));
+        }
+
+
+        .logo:hover .logo-img {
+            transform: rotate(-5deg) scale(1.05);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .nav-links { display: flex; gap: 3rem; }
+        .nav-links a { 
+            color: var(--text-primary); text-decoration: none; font-size: 0.75rem; 
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 600; 
+        }
+
+        /* VIEW CONTROLLER */
+        #main-view { display: block; }
+        #report-view { display: none; padding: 10rem 10%; min-height: 100vh; background: var(--bg-color); }
+
+        /* HERO */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; 
+            justify-content: center; padding: 0 10%; position: relative;
+        }
+        .hero h1 { 
+            font-family: var(--font-heading); font-size: clamp(3.5rem, 10vw, 8rem); 
+            line-height: 0.85; margin-bottom: 2rem; 
+        }
+        .hero h1 span { display: block; color: var(--accent); font-style: italic; }
+        
+        /* ABOUT STORYTELLING SECTION */
+        .about-story { padding: 10rem 10%; }
+        .story-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; }
+        .story-header h2 { font-family: var(--font-heading); font-size: 4rem; line-height: 1; }
+        .story-header p { max-width: 400px; color: var(--text-secondary); }
+
+        /* HORIZONTAL TIMELINE */
+        .timeline-container {
+            position: relative;
+            padding: 4rem 0;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .timeline-container::-webkit-scrollbar { height: 4px; }
+        .timeline-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .timeline-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        .timeline-track {
+            display: flex;
+            gap: 4rem;
+            padding-bottom: 2rem;
+            min-width: max-content;
+            position: relative;
+        }
+
+        .timeline-track::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent) 0%, rgba(255,255,255,0.1) 100%);
+            z-index: 1;
+        }
+
+        .timeline-item { width: 300px; position: relative; z-index: 2; }
+        .timeline-dot {
+            width: 12px; height: 12px; background: var(--bg-color);
+            border: 2px solid var(--accent); border-radius: 50%;
+            margin-bottom: 2rem; transition: var(--transition-smooth);
+        }
+        .timeline-item:hover .timeline-dot {
+            background: var(--accent); box-shadow: 0 0 15px var(--accent); transform: scale(1.3);
+        }
+        .timeline-year { font-family: var(--font-heading); font-size: 1.8rem; color: var(--accent); display: block; margin-bottom: 0.5rem; }
+        .timeline-content h3 { font-size: 1.1rem; margin-bottom: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+        .timeline-content p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* SLIDING IMAGES SECTION (LOOPED) */
+        .slider-section { padding: 5rem 0; overflow: hidden; background: #000; }
+        
+        /* 12 slides * 350px = 4200px track */
+        .slider-track { 
+            display: flex; 
+            width: calc(350px * 12); 
+            animation: infiniteLoop 30s linear infinite; 
+        }
+        
+        .slide { width: 350px; height: 450px; padding: 0 15px; flex-shrink: 0; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: 0.5s; }
+        .slide:hover img { filter: grayscale(0); transform: scale(1.05); }
+
+        /* Keyframes move by half the track (6 slides) for seamless loop */
+        @keyframes infiniteLoop { 
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(calc(-350px * 6)); } 
+        }
+
+        /* EVENT CORNER SCROLLABLE */
+        .event-corner { padding: 10rem 10%; }
+        .event-tabs { display: flex; gap: 2rem; margin-bottom: 4rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { 
+            padding-bottom: 1rem; color: var(--text-secondary); cursor: none; 
+            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            position: relative;
+        }
+        .tab.active { color: var(--text-primary); }
+        .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent); }
+
+        .event-scroll-container {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+            padding-bottom: 3rem;
+            scroll-snap-type: x mandatory;
+        }
+
+        .event-scroll-container::-webkit-scrollbar { height: 4px; }
+        .event-scroll-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .event-scroll-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        .event-grid { 
+            display: flex;
+            gap: 2rem;
+            min-width: max-content;
+        }
+
+        .event-card { 
+            width: 400px;
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.05); 
+            overflow: hidden; transition: var(--transition-smooth);
+            scroll-snap-align: start;
+        }
+        .event-card:hover { transform: translateY(-10px); border-color: var(--accent); }
+        .event-img { width: 100%; height: 220px; object-fit: cover; }
+        .event-content { padding: 2rem; }
+        .event-tag { font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+        .event-card h3 { font-family: var(--font-heading); font-size: 1.5rem; margin: 0.5rem 0; }
+
+        /* PROMO SECTION */
+        .promo-section {
+            padding: 8rem 10%;
+            background: var(--surface);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .promo-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: url("images/exodus.png") no-repeat center center;
+            background-size: cover;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            filter: brightness(0.6);
+            transition: filter 0.4s ease;
+        }
+        .promo-image:hover {
+            /* 🔼 Bright on hover */
+            filter: brightness(1);
+        }
+        .promo-badge {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: var(--accent);
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transform: rotate(15deg);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .promo-badge:hover {
+            background: #ef4444; /* red */
+            transform: scale(1.05); /* optional premium hover feel */
+        }
+
+        .flagship-text {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.4s ease;
+}
+
+/* Secure pass button transition */
+.secure-pass {
+    transition: background 0.4s ease, transform 0.4s ease;
+}
+
+.promo-section:hover .flagship-text {
+    color: #ef4444; /* red */
+}
+
+.promo-section:hover .secure-pass {
+    background: #ef4444; /* red */
+    transform: translateY(-4px);
+}
+
+        /* TEAM SECTION */
+        .team-section { padding: 10rem 10%; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 4rem; }
+        .member-card { text-align: center; }
+        .member-circle { 
+            width: 150px; height: 150px; margin: 0 auto 2rem; border-radius: 50%; 
+            overflow: hidden; border: 2px solid transparent; transition: 0.5s;
+        }
+        .member-card:hover .member-circle { border-color: var(--accent); }
+        .member-circle img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: 0.5s; }
+        .member-card:hover img { filter: grayscale(0); transform: scale(1.1); }
+
+        /* FOOTER */
+        footer {
+            padding: 5rem 10%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-top: 1px solid #111;
+        }
+
+        /* REVEAL */
+        .reveal { opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(0.23, 1, 0.32, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .btn { display: inline-block; text-decoration: none; padding: 1.2rem 2.5rem; border: none; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; transition: 0.4s; cursor: none; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-5px); }
+
+        /* REPORT VIEW STYLES */
+        .report-header { margin-bottom: 4rem; }
+        .back-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.8rem 1.5rem; margin-bottom: 2rem; cursor: none; }
+        .report-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 5rem; }
+        .report-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; }
+        .report-gallery img { width: 100%; height: 250px; object-fit: cover; }
+
+        @media (max-width: 900px) {
+            .story-header, .promo-section, footer { flex-direction: column; align-items: flex-start; gap: 2.5rem; grid-template-columns: 1fr; }
+            .report-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            section { padding: 5rem 5% !important; }
+            .event-card { width: 300px; }
+        }
+        .event-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 4.8em; /* collapsed height (~3 lines) */
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .event-desc.expanded {
+            max-height: 120px; /* fixed expanded height */
+            overflow-y: auto;
+        }
+
+        /* Clean scrollbar (premium look) */
+        .event-desc.expanded::-webkit-scrollbar {
+            width: 4px;
+        }
+        .event-desc.expanded::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        .read-more {
+            margin-top: 0.8rem;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: none;
+        }
+        .partner-section {
+            margin-top: 3rem;
+        }
+
+        .partner-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .partner-logo {
+            max-height: 40px;
+            filter: grayscale(1) opacity(0.8);
+            transition: 0.4s ease;
+        }
+
+        .partner-logo:hover {
+            filter: grayscale(0) opacity(1);
+            transform: scale(1.05);
+        }
+
+        /* NAV LINK BASE */
+.nav-links a {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+/* HOVER TEXT COLOR */
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+/* UNDERLINE EFFECT */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0%;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+
+/* UNDERLINE ANIMATION */
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* HERO 3D LOGO CONTAINER */
+.hero {
+    position: relative;
+}
+
+/* LOGO WRAPPER */
+.hero-logo-3d {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 320px;
+    height: 320px;
+    perspective: 1000px;
+    pointer-events: none;
+}
+
+/* LOGO IMAGE */
+.hero-logo-3d img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 40px rgba(59,130,246,0.35));
+    animation: floatRotate 10s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* FLOAT + 3D ROTATION */
+@keyframes floatRotate {
+    0% {
+        transform: rotateY(0deg) rotateX(0deg) translateY(0);
+    }
+    25% {
+        transform: rotateY(15deg) rotateX(5deg) translateY(-10px);
+    }
+    50% {
+        transform: rotateY(0deg) rotateX(0deg) translateY(0);
+    }
+    75% {
+        transform: rotateY(-15deg) rotateX(-5deg) translateY(-10px);
+    }
+    100% {
+        transform: rotateY(0deg) rotateX(0deg) translateY(0);
+    }
+}
+
+/* HIDE LOGO ON SMALL SCREENS */
+@media (max-width: 1000px) {
+    .hero-logo-3d {
+        display: none;
+    }
+}
+
+/* ROLE TEXT DEFAULT (BLUE) */
+.member-role {
+    color: var(--accent);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+/* CHANGE TO RED WHEN HOVERING THE MEMBER */
+.member-card:hover .member-role {
+    color: #ef4444; /* red */
+}
+
+.copyright-social {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end; /* or left if needed */
+  gap: 14px;
+}
+
+.copyright-social img {
+  width: 34px;   /* increased from 18px */
+  height: 34px;
+  opacity: 0.85;
+  transition: 
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    filter 0.3s ease;
+}
+
+
+.copyright-social img:hover {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.08);
+  filter: drop-shadow(0 0 6px rgba(30, 144, 255, 0.8))
+          drop-shadow(0 0 12px rgba(30, 144, 255, 0.6));
+}
+
+.copyright-social a:nth-child(1) img:hover {
+  filter: drop-shadow(0 0 8px #e1306c); /* Instagram */
+}
+
+.copyright-social a:nth-child(2) img:hover {
+  filter: drop-shadow(0 0 8px #0a66c2); /* LinkedIn */
+}
+
+.copyright-social a:nth-child(3) img:hover {
+  filter: drop-shadow(0 0 8px #ffffff); /* GitHub */
+}
+
+.copyright-social img {
+  filter: drop-shadow(0 0 2px rgba(30, 144, 255, 0.3));
+}
+
+
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <nav>
+        <a href="#main-view" class="logo" onclick="closeReport()">
+            <img src="images/logo.png" alt="Coding Club Logo" class="logo-img">
+            CODING CLUB @ICCS.
+        </a>
+        <div class="nav-links">
+            <a href="#about" onclick="closeReport()">Overview</a>
+            <a href="#events" onclick="closeReport()">Event Corner</a>
+            <a href="#team" onclick="closeReport()">Collective</a>
+            <a href="#join" onclick="closeReport()">Engage</a>
+        </div>
+    </nav>
+
+    <div id="main-view">
+        <section class="hero">
+            <h1>Building the <span>Future</span>  of Code & Live.</h1>
+            <div class="hero-logo-3d">
+    <img src="images/logo1.png" alt="Coding Club Logo">
+</div>
+
+            <p style="max-width: 600px; color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 3rem;">
+                The elite innovation collective at the heart  to change the nromal to extend. We don't study the future, we engineer it.
+            </p>
+            <div>
+                <button class="btn btn-primary" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Apply to Join</button>
+            </div>
+        </section>
+
+        <!-- SLIDER SECTION (Infinite Loop) -->
+        <section class="slider-section">
+            <div class="slider-track">
+                <!-- Original Set -->
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\1.jpg" alt="S1"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\2.jpg" alt="S2"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\3.jpg" alt="S3"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\4.jpg" alt="S4"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\5.png" alt="S5"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\6.jpg" alt="S6"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\7.jpg" alt="S7"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\8.png" alt="S8"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\9.jpg" alt="S9"></div>
+                <!-- Duplicate Set for Seamless Transition -->
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\1.jpg" alt="S1"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\2.jpg" alt="S2"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\3.jpg" alt="S3"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\4.jpg" alt="S4"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\5.png" alt="S5"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\6.jpg" alt="S6"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\7.jpg" alt="S7"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\8.png" alt="S8"></div>
+                <div class="slide"><img src="C:\Users\rajup\OneDrive\Desktop\coding\images\9.jpg" alt="S9"></div>
+            </div>
+        </section>
+
+        <!-- STORY SECTION -->
+        <section id="about" class="about-story reveal">
+            <div class="story-header">
+                <h2>Our Story.</h2>
+                <p>Coding CLub @ICCS was born from a innovation of Futura Labs: the gap between academic theory and industry reality was widening. We are trying to close it.</p>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline-track">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="timeline-year">2023</span>
+                        <div class="timeline-content">
+                            <h3>The Genesis</h3>
+                            <p>In collaboration with Futura Labs, ICCS has launched an innovative Coding Club to nurture future tech talent.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="timeline-year">July 2025</span>
+                        <div class="timeline-content">
+                            <h3>Debut</h3>
+                            <p>Futura Labs marked the kick-off of the Coding Club at ICCS.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="timeline-year">August 2025</span>
+                        <div class="timeline-content">
+                            <h3>Linux 101</h3>
+                            <p>Hosted the first student-led Hands-on session for the students, which gave them the knowledge of linux coding.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="timeline-year">September 2025</span>
+                        <div class="timeline-content">
+                            <h3>Artifact - Hackathon</h3>
+                            <p>It was a memorable overnight hackathon that enhanced student problem-solving and programming skills while fostering collaboration, leadership, and innovation, making it a great success for us & college.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVENT CORNER -->
+        <section id="events" class="event-corner reveal">
+            <h2 style="font-family: var(--font-heading); font-size: 3.5rem; margin-bottom: 3rem;">Event Corner.</h2>
+            <div class="event-tabs">
+                <div class="tab active" onclick="switchTab('upcoming')">Upcoming</div>
+                <div class="tab" onclick="switchTab('completed')">Completed Archive</div>
+            </div>
+            <div class="event-scroll-container">
+                <div id="event-grid" class="event-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PROMO AD SECTION -->
+        <section class="promo-section reveal">
+            <div class="promo-image">
+                <div class="promo-badge">Live Event</div>
+            </div>
+            <div class="promo-content">
+                <span class="flagship-text">Flagship Programme</span>
+                <h2 style="font-family:var(--font-heading); font-size:3.5rem; margin:1rem 0; line-height:1.1;">Exodus - HackJam 2026.</h2>
+                <p style="color:var(--text-secondary); margin-bottom:2.5rem; max-width:450px;">Join 200+ visionaries for the kerala's new methodic HackJam.</p>
+                <a href="https://example.com/tickets" target="_blank"  class="btn btn-primary secure-pass">Secure Your Pass</a>
+            </div>
+        </section>
+
+        <section id="team" class="team-section reveal">
+            <h2 style="font-family: var(--font-heading); font-size: 3.5rem; text-align: center; margin-bottom: 5rem;">The Collective.</h2>
+            <div class="team-grid">
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/rini.jpeg" alt="M1"></div>
+                    <span class = "member-role">FACULTY ADVISOR</span>
+                    <h3>Rini A P</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/akash.jpg" alt="M2"></div>
+                    <span class = "member-role">COORDINATOR</span>
+                    <h3>Akash P R</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/tyson.jpg" alt="M3"></div>
+                    <span class = "member-role">TECH LEAD</span>
+                    <h3>Tino Tyson</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/aji.jpg" alt="M3"></div>
+                    <span class = "member-role">COMMUNITY MANAGER</span>
+                    <h3>Ajil P R</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/abhi.jpg" alt="M3"></div>
+                    <span class = "member-role">EVENT MANAGER</span>
+                    <h3>Abhi Paul</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/paul.png" alt="M3"></div>
+                    <span class = "member-role">MEDIA HEAD</span>
+                    <h3>Tino Paul</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/stini.jpg" alt="M3"></div>
+                    <span class = "member-role">DOCUMENTATION</span>
+                    <h3>Stini N S</h3>
+                </div>
+                <div class="member-card">
+                    <div class="member-circle"><img src="C:\Users\rajup\OneDrive\Desktop\coding/images/cc/aswin.jpg" alt="M3"></div>
+                    <span class = "member-role">DOCUMENTATION</span>
+                    <h3>Aswin Jayaraj N</h3>
+                </div>
+            </div>
+        </section>
+
+        <section id="join" class="reveal" style="padding: 10rem 10%; background: var(--surface);">
+            <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+                <h2 style="font-family: var(--font-heading); font-size: 4rem;">Secure Your Seat.</h2>
+                <p style="color: var(--text-secondary); margin: 2rem 0;">We are happy if you are interested.</p>
+                <form id="applyForm" style="display: flex; flex-direction: column; gap: 2rem; text-align: left;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <input id="name" type="text" placeholder="Name" required
+                            style="background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; padding: 1rem;">
+
+                        <input id="email" type="email" placeholder="University Email" required
+                            style="background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; padding: 1rem;">
+                    </div>
+
+                    <textarea id="message" placeholder="Why do you want to join?" required
+                        style="background: transparent; border: 1px solid #333; color: #fff; padding: 1rem; min-height: 120px;"></textarea>
+
+                    <button class="btn btn-primary" style="align-self: center;" type="submit">
+                        Initiate Application
+                    </button>
+                </form>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- EVENT REPORT VIEW -->
+    <div id="report-view">
+        <button class="back-btn" onclick="closeReport()">← Back to Main</button>
+        <div id="report-content">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <footer>
+        <a href="#main-view" class="logo" onclick="closeReport()">
+            <img src="images/logo.png" alt="Nexus Logo" class="logo-img">
+            CODING CLUB.
+        </a>
+        <div style="color: var(--text-secondary);">© 2026 Innovation Society</div>
+        <div class="copyright-social">
+  <a href="https://instagram.com/codingclub" target="_blank" aria-label="Instagram">
+    <img src="./images/icons/instagram.svg" alt="Instagram">
+  </a>
+
+  <a href="https://linkedin.com/company/codingclub" target="_blank" aria-label="LinkedIn">
+    <img src="./images/icons/linkedin.svg" alt="LinkedIn">
+  </a>
+
+    <a href="https://github.com/codingclub" target="_blank" aria-label="GitHub">
+    <img src="./images/icons/x.svg" alt="X">
+  </a>
+</div>
+
+    </footer>
+
+    <script>
+        // EXPANDED DATASET FOR SCROLLING
+        const events = [
+            { id: 1, type: 'upcoming', title: 'EXODUS -Hack Jam', date: 'Feb 6, 2026', img: ' images/hai.jpg', desc: 'A deep dive into LLM fine-tuning and RAG.', report: 'Upcoming event. Registration open for all in kerala.',  partners: [ { name: 'Futura Labs', logo: 'images/partners/futura.jpg' }, { name: 'ICCS', logo: 'images/partners/iccs.jpg' }, { name: 'MakeMyPass', logo: 'images/partners/makemypass.png' }, { name: 'IIC', logo: 'images/partners/iic.jpg' }, { name: 'Zionyx', logo: 'images/partners/zionyx.png' } ], gallery: [ ] },
+            { id: 3, type: 'upcoming', title: 'Coming Soon', date: 'Unknown', img: 'images/cs.png', desc: 'Top Secret.', report: 'Wait' },
+            { id: 4, type: 'upcoming', title: 'Coming Soon', date: 'Unknown', img: 'images/cs.png', desc: 'Top Secret.', report: 'Wait' },
+            { id: 5, type: 'upcoming', title: 'Coming Soon', date: 'Unknown', img: 'images/cs.png', desc: 'Top Secret', report: 'Wait' },
+            
+            { id: 2, type: 'completed', title: 'Inauguration of CC', date: 'July 2025', img: 'images/9.jpg', desc: 'The Coding Club Inauguration held on 16th July was a successful and inspiring event that brought together students, faculty, and industry experts to promote coding culture, innovation, and student collaboration. The program marked the beginning of an exciting journey for the club with strong academic and industry support.', report: `'The Department of Computer Science successfully conducted the Coding Club Inauguration Ceremony on 16th July at the College Seminar Hall, ICCSCEM, with active participation from Semester 3, 5, and 7 Coding Club members. The event marked the formal launch of the club and aimed to promote a strong coding culture and innovation among students.
+
+The ceremony began with a welcome address by Ms. Divya Jose, HOD – CSE, who highlighted the importance of technical communities in shaping students’ professional growth. This was followed by the Presidential Address by Executive Director Dr. Jai M Paul, who officially launched the Coding Club.
+
+The Principal Dr. Vibin Antony and Vice Principal Dr. Bravilin K Jiju felicitated the dignitaries and appreciated the collective efforts of faculty and student coordinators.
+
+The event was graced by Mr. Sanjay K Santhosh and Mr. Vimay A K from Future Lab as Chief Guests. Mr. Vismaya K introduced the Coding Club, outlining its vision, structure, and planned activities, while Mr. Sanjay K Santhosh delivered a keynote on “Trends in the Industry”, emphasizing emerging technologies and the importance of coding skills.
+
+The program concluded with a Vote of Thanks by Mr. Akash P R, Campus Club Coordinator.
+
+A special highlight of the event was the announcement of a collaboration with HOOMAN (Make My Pass), introducing HOOGO, an interactive gamified networking platform designed to enhance student engagement and connectivity.
+
+The inauguration was a successful beginning for the Coding Club, setting the stage for future learning, collaboration, and innovation.'`, stats: { attendance: '80+',},  partners: [ { name: 'Futura Labs', logo: 'images/partners/futura.jpg' }, { name: 'ICCS', logo: 'images/partners/iccs.jpg' }, { name: 'MakeMyPass', logo: 'images/partners/makemypass.png' }, { name: 'HOOGO', logo: 'images/partners/hoogo.svg' }, { name: 'IIC', logo: 'images/partners/iic.jpg' }, { name: 'Zionyx', logo: 'images/partners/zionyx.png' }  ], gallery: ['images/8.png','images/9.jpg','images/10.jpg','images/11.png','images/12.jpg', ] },
+            { id: 6, type: 'completed', title: 'Linux-101', date: 'August 2025', img: 'images/6.jpg', desc: 'The Linux 101 workshop organized by the Coding Club of ICCS College of Engineering and Management was a successful and informative session that introduced students to the fundamentals of Linux and command-line usage. Conducted on August 1, 2025, the session helped participants gain hands-on experience with basic Linux commands and file management. The workshop created strong interest among students to explore open-source tools and advanced Linux topics, making it a valuable learning experience for all attendees.', report: `'The Coding Club of ICCS College of Engineering and Management successfully conducted a workshop titled “Linux 101” on August 1, 2025, at 12:40 PM in the Programming Lab (I5-LAB). The session was held offline and was open to all CSE students, with participation from Semester 3 and Semester 5 students. A total of 55 students attended the workshop.
+
+The primary objective of the session was to introduce students to the fundamentals of the Linux operating system, promote the use of open-source tools, and build confidence in using the command-line interface (CLI).
+
+The workshop was led by Mr. Tino Tyson, a third-year CSE student, Linux enthusiast, and the club’s Tech Wizard. The session covered key topics including an introduction to Linux and its open-source philosophy, basic terminal navigation, file and directory management, file permissions, viewing and editing files using commands such as cat, nano, and echo, installing software using apt, and basic system commands. Students also gained hands-on experience using Ubuntu in a live or virtual environment.
+
+Participants gained practical exposure to Linux terminal commands and developed a clear understanding of file system interaction through the CLI. The session successfully simplified Linux concepts for beginners and sparked interest in advanced topics such as scripting and networking.
+
+The workshop concluded on a positive note, laying a strong foundation for future Linux and open-source–focused sessions. The enthusiastic response highlighted the growing importance of Linux in development and system administration.'`, stats: { attendance: '60+', projects: 'Knowledge sections'},  partners: [ { name: 'Futura Labs', logo: 'images/partners/futura.jpg' }, { name: 'ICCS', logo: 'images/partners/iccs.jpg' }, { name: 'MakeMyPass', logo: 'images/partners/makemypass.png' }, { name: 'IIC', logo: 'images/partners/iic.jpg' }, { name: 'Zionyx', logo: 'images/partners/zionyx.png' } ], gallery: ['images/6.jpg','images/7.jpg','images/13.jpg','images/14.jpg' ] },
+            { id: 7, type: 'completed', title: 'Artifact - Hackathon', date: 'September, 2025', img: 'images/2.jpg', desc: '“Artifact”, the overnight hackathon organized by the Coding Club of ICCS College of Engineering and Management, was a highly engaging and successful event that encouraged innovation, teamwork, and technical creativity among students. Conducted from the evening of September 12th to the morning of September 13th, the hackathon provided participants with an exciting platform to brainstorm, develop, and present innovative solutions. With strong support from the college management, faculty, and Coding Club coordinators, the event created a vibrant learning environment and concluded with great enthusiasm and positive feedback.', report: `'The Coding Club of ICCS College of Engineering and Management successfully organized an overnight hackathon titled “Artifact” from September 12th, 5:30 PM to September 13th, 8:00 AM. The event aimed to enhance students’ technical skills, creativity, teamwork, and problem-solving abilities.
+
+The event commenced with an inaugural ceremony on September 12th, featuring a welcome address by the Coding Club core members. The inaugural speech was delivered by Executive Director Dr. Jai M Paul, followed by felicitation speeches from Principal Dr. Vibin Antony, Vice Principal Dr. K Bravilin Biju, HOD – CSE Ms. Divya Jose, and other Heads of Departments. The ceremony concluded with a vote of thanks by a core member.
+
+The hackathon officially began at 5:30 PM with an ice-breaking session. Participants registered in teams of three, guided by three CEOs — Amulya, Rexy, and Slipa, assisted by CTOs from the Coding Club core team. Team selection was conducted through an engaging “Spin the Wheel” activity.
+
+Problem statements were announced at 6:00 PM, followed by brainstorming sessions. The first evaluation round (Idea Introduction) was held at 7:00 PM. After dinner, teams moved into the development phase. The second evaluation took place at 12:00 AM, where teams presented concepts and early prototypes. The final evaluation was conducted at 6:00 AM, assessing creativity, feasibility, and innovation.
+
+Team Frozta, mentored by CEO Amulya, emerged as the winner and received a cash prize of ₹500. Fun games and entertainment activities were conducted throughout the event to keep participants energized. Feedback was collected for future improvements.
+
+The event concluded with a vote of thanks by Ms. Jiji A.J., Coding Club Coordinator, acknowledging the management, faculty, organizers, and participants, with special appreciation to Ms. Divya Jose, HOD – CSE, for her continuous support.
+
+“Artifact” was a successful and enriching experience, promoting innovation, collaboration, and hands-on learning among students.'`, stats: { attendance: '50+', projects: '4 Solutions'},  partners: [ { name: 'Futura Labs', logo: 'images/partners/futura.jpg' }, { name: 'ICCS', logo: 'images/partners/iccs.jpg' }, { name: 'MakeMyPass', logo: 'images/partners/makemypass.png' }, { name: 'IIC', logo: 'images/partners/iic.jpg' }, { name: 'Zionyx', logo: 'images/partners/zionyx.png' } ], gallery: ['images/2.jpg','images/4.jpg','images/5.png','images/15.jpg','images/16.jpg','images/17.jpg','images/18.jpg','images/19.jpg' ] }
+        ];
+
+        // UI LOGIC
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 20 + 'px'; follower.style.top = e.clientY - 20 + 'px'; }, 50);
+        });
+
+        function switchTab(type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderEvents(type);
+        }
+
+        function renderEvents(type) {
+            const grid = document.getElementById('event-grid');
+            grid.innerHTML = '';
+            events.filter(e => e.type === type).forEach(e => {
+                grid.innerHTML += `
+                    <div class="event-card" onclick="openReport(${e.id})">
+                        <img src="${e.img}" class="event-img">
+                        <div class="event-content">
+                            <span class="event-tag">${e.date}</span>
+                            <h3>${e.title}</h3>
+                            <p class="event-desc" id="desc-${e.id}">
+                                ${e.desc}
+                            </p>
+                            <button class="read-more" onclick="toggleReadMore(event, ${e.id})">
+                                Read More →
+                            </button>
+                            <button style="margin-top:1.5rem; background:transparent; color:var(--accent); border:none; text-transform:uppercase; font-size:0.7rem; font-weight:700; cursor:none;">View Details →</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+function openReport(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+
+    const reportView = document.getElementById('report-view');
+    const mainView = document.getElementById('main-view');
+    const content = document.getElementById('report-content');
+
+    content.innerHTML = `
+        <div class="report-header">
+            <span class="event-tag">
+                ${event.date} // ${event.type.toUpperCase()}
+            </span>
+            <h1 style="font-family:var(--font-heading); font-size:4rem; margin-top:1rem;">
+                ${event.title}
+            </h1>
+        </div>
+
+        <div class="report-grid">
+
+            <!-- LEFT COLUMN -->
+            <div>
+                <h2 style="font-family:var(--font-heading); margin-bottom:2rem;">
+                    Event Overview
+                </h2>
+
+                <p style="font-size:1.2rem; line-height:1.8; color:var(--text-secondary);">
+                    ${event.report || 'Detailed report will be published soon.'}
+                </p>
+
+                ${
+                    event.gallery?.length
+                    ? `
+                        <div class="report-gallery">
+                            ${event.gallery.map(img =>
+                                `<img src="${img}" alt="Event image">`
+                            ).join('')}
+                        </div>
+                      `
+                    : ''
+                }
+
+                ${
+                    event.partners?.length
+                    ? `
+                        <div class="partner-section">
+                            <h3 style="margin:3rem 0 1.5rem; font-family:var(--font-heading);">
+                                Partners
+                            </h3>
+                            <div class="partner-grid">
+                                ${event.partners.map(p =>
+                                    `<img src="${p.logo}" alt="${p.name}" class="partner-logo">`
+                                ).join('')}
+                            </div>
+                        </div>
+                      `
+                    : ''
+                }
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div style="background:var(--surface); padding:2rem; height:fit-content;">
+                <h3 style="margin-bottom:1.5rem;">Event Stats</h3>
+
+                ${
+                    event.stats
+                    ? `
+                        <ul style="
+                            list-style:none;
+                            display:flex;
+                            flex-direction:column;
+                            gap:1rem;
+                            color:var(--text-secondary);
+                        ">
+                            ${event.stats.attendance ? `<li>• Attendance: ${event.stats.attendance}</li>` : ''}
+                            ${event.stats.partners ? `<li>• Partners: ${event.stats.partners}</li>` : ''}
+                            ${event.stats.projects ? `<li>• Projects: ${event.stats.projects}</li>` : ''}
+                            ${event.stats.duration ? `<li>• Duration: ${event.stats.duration}</li>` : ''}
+                        </ul>
+                      `
+                    : `
+                        <p style="color:var(--text-secondary); font-style:italic;">
+                            Event statistics will be updated soon.
+                        </p>
+                      `
+                }
+            </div>
+
+        </div>
+    `;
+
+    mainView.style.display = 'none';
+    reportView.style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+
+
+
+        function closeReport() {
+            document.getElementById('report-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+        }
+        function toggleReadMore(e, id) {
+            e.stopPropagation(); // prevent card click
+            const desc = document.getElementById(`desc-${id}`);
+
+            desc.classList.toggle('expanded');
+
+            e.target.innerText = desc.classList.contains('expanded')
+                ? 'Read Less ←'
+                : 'Read More →';
+        }
+
+
+        // INIT
+        renderEvents('upcoming');
+        const obs = new IntersectionObserver((es) => es.forEach(e => e.isIntersecting && e.target.classList.add('active')), {threshold: 0.1});
+        document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
+
+
+document.getElementById('applyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        const response = await fetch('http://localhost:3000/api/apply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('✅ Application submitted successfully!');
+            e.target.reset();
+        } else {
+            alert('❌ Submission failed');
+        }
+    } catch (error) {
+        alert('⚠️ Server not reachable');
+    }
+});
+
+        
+    </script>
+</body>
+</html>
